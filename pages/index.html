@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Prosus · Digital Regulatory Monitor</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Source+Serif+4:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --ink:        #0A0A0A;
+      --ink-light:  #3A3A3A;
+      --ink-muted:  #6B6B6B;
+      --paper:      #FAF8F4;
+      --paper-dark: #F0EDE6;
+      --rule:       #C8C0B0;
+      --rule-dark:  #1A1A1A;
+      --accent:     #C41E3A;   /* newspaper red */
+      --accent2:    #1A3A6B;   /* ink blue */
+      --gold:       #B8860B;
+      --alert-bg:   #FFF8E7;
+      --alert-border: #C41E3A;
+      --r:          4px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Source Serif 4', Georgia, serif;
+      background: var(--paper);
+      color: var(--ink);
+      min-height: 100vh;
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    /* ── MASTHEAD ─────────────────────────────────────────────────── */
+    .masthead {
+      background: var(--ink);
+      color: #fff;
+      padding: 0;
+      border-bottom: 3px solid var(--accent);
+    }
+    .masthead-top {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 24px 10px;
+      border-bottom: 1px solid rgba(255,255,255,.15);
+    }
+    .masthead-brand {
+      display: flex; align-items: baseline; gap: 12px;
+    }
+    .masthead-title {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 1.7rem; font-weight: 900;
+      letter-spacing: -0.5px; color: #fff;
+      text-transform: uppercase;
+    }
+    .masthead-sub {
+      font-family: 'Inter', sans-serif;
+      font-size: .65rem; font-weight: 500;
+      letter-spacing: 2px; text-transform: uppercase;
+      color: rgba(255,255,255,.55); margin-top: 1px;
+    }
+    .masthead-meta {
+      font-family: 'Inter', sans-serif;
+      font-size: .7rem; color: rgba(255,255,255,.5);
+      text-align: right; line-height: 1.4;
+    }
+    .masthead-meta strong { color: rgba(255,255,255,.85); }
+
+    /* ── NAV STRIP ────────────────────────────────────────────────── */
+    .nav-strip {
+      background: var(--ink);
+      overflow-x: auto; white-space: nowrap;
+      padding: 0 20px;
+      -webkit-overflow-scrolling: touch;
+    }
+    .nav-strip::-webkit-scrollbar { display: none; }
+    .nav-btn {
+      display: inline-block;
+      font-family: 'Inter', sans-serif;
+      font-size: .72rem; font-weight: 600;
+      letter-spacing: .3px;
+      padding: 10px 14px;
+      color: rgba(255,255,255,.6);
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      transition: color .15s, border-color .15s;
+      text-transform: uppercase;
+      user-select: none;
+    }
+    .nav-btn:hover { color: #fff; }
+    .nav-btn.active {
+      color: #fff;
+      border-bottom-color: var(--accent);
+    }
+
+    /* ── FLASH ALERTS ─────────────────────────────────────────────── */
+    #flash-banner {
+      display: none;
+      background: var(--alert-bg);
+      border-top: 3px solid var(--accent);
+      border-bottom: 1px solid #e8d9a0;
+      padding: 10px 24px;
+    }
+    .flash-row {
+      display: flex; align-items: flex-start; gap: 12px;
+      flex-wrap: wrap;
+    }
+    .flash-label {
+      font-family: 'Inter', sans-serif;
+      font-size: .65rem; font-weight: 700;
+      letter-spacing: 1.5px; text-transform: uppercase;
+      color: var(--accent); white-space: nowrap;
+      padding-top: 2px;
+    }
+    .flash-item {
+      font-family: 'Inter', sans-serif;
+      font-size: .75rem; color: var(--ink-light);
+      cursor: pointer; text-decoration: underline;
+      text-decoration-color: transparent;
+      transition: text-decoration-color .15s;
+    }
+    .flash-item:hover { text-decoration-color: var(--accent); color: var(--accent); }
+    .flash-sep { color: var(--rule); padding: 0 4px; }
+
+    /* ── SEARCH ───────────────────────────────────────────────────── */
+    .search-strip {
+      background: var(--paper-dark);
+      border-bottom: 1px solid var(--rule);
+      padding: 8px 24px;
+    }
+    #search {
+      width: 100%; max-width: 440px;
+      font-family: 'Inter', sans-serif;
+      font-size: .8rem;
+      padding: 7px 12px;
+      border: 1px solid var(--rule);
+      border-radius: var(--r);
+      background: #fff;
+      color: var(--ink);
+      outline: none;
+      transition: border-color .15s;
+    }
+    #search:focus { border-color: var(--ink); }
+
+    /* ── LAYOUT ───────────────────────────────────────────────────── */
+    .page-wrap {
+      max-width: 1160px;
+      margin: 0 auto;
+      padding: 24px 20px 40px;
+    }
+
+    /* ── SECTION HEADER ───────────────────────────────────────────── */
+    .section-masthead {
+      border-top: 3px solid var(--rule-dark);
+      border-bottom: 1px solid var(--rule);
+      padding: 8px 0;
+      margin-bottom: 20px;
+      display: flex; align-items: baseline; gap: 16px;
+    }
+    .section-masthead h2 {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 1.2rem; font-weight: 700;
+      letter-spacing: -.3px;
+    }
+    .section-count {
+      font-family: 'Inter', sans-serif;
+      font-size: .7rem; font-weight: 600;
+      color: var(--ink-muted);
+      letter-spacing: .5px;
+    }
+    .section-date {
+      font-family: 'Inter', sans-serif;
+      font-size: .68rem; color: var(--ink-muted);
+      margin-left: auto;
+    }
+
+    /* ── STATS ROW ────────────────────────────────────────────────── */
+    .stats-row {
+      display: flex; gap: 0;
+      border: 1px solid var(--rule);
+      border-radius: var(--r);
+      overflow: hidden;
+      margin-bottom: 20px;
+      background: #fff;
+    }
+    .stat-cell {
+      flex: 1; text-align: center;
+      padding: 10px 6px;
+      border-right: 1px solid var(--rule);
+      min-width: 60px;
+    }
+    .stat-cell:last-child { border-right: none; }
+    .stat-num {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.4rem; font-weight: 700;
+      color: var(--accent2); display: block;
+    }
+    .stat-lbl {
+      font-family: 'Inter', sans-serif;
+      font-size: .58rem; font-weight: 600;
+      text-transform: uppercase; letter-spacing: .5px;
+      color: var(--ink-muted); display: block;
+      margin-top: 1px;
+    }
+
+    /* ── NEWSPAPER GRID ───────────────────────────────────────────── */
+    .news-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0;
+      border-top: 1px solid var(--rule);
+    }
+    @media (max-width: 800px) {
+      .news-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 520px) {
+      .news-grid { grid-template-columns: 1fr; }
+    }
+
+    /* Lead story — full width */
+    .news-grid .card:first-child {
+      grid-column: 1 / -1;
+      border-bottom: 2px solid var(--rule-dark);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+    }
+    @media (max-width: 640px) {
+      .news-grid .card:first-child { grid-template-columns: 1fr; }
+    }
+
+    /* ── ARTICLE CARD ─────────────────────────────────────────────── */
+    .card {
+      padding: 16px 18px;
+      border-right: 1px solid var(--rule);
+      border-bottom: 1px solid var(--rule);
+      cursor: pointer;
+      transition: background .12s;
+      position: relative;
+    }
+    .card:hover { background: rgba(0,0,0,.02); }
+    .card:nth-child(3n) { border-right: none; }
+
+    /* Lead card layout */
+    .card:first-child { padding: 20px 24px; }
+    .card:first-child .card-lead-text { padding: 20px 24px; }
+
+    .card-kicker {
+      font-family: 'Inter', sans-serif;
+      font-size: .62rem; font-weight: 700;
+      letter-spacing: 1.2px; text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 6px;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .card-kicker .scope-dot {
+      width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0;
+    }
+    .scope-A { background: var(--accent); }
+    .scope-B { background: var(--gold); }
+    .scope-C { background: #5A9A6A; }
+
+    .card-headline {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 1.05rem; font-weight: 700;
+      line-height: 1.25;
+      color: var(--ink);
+      margin-bottom: 8px;
+    }
+    .card:first-child .card-headline {
+      font-size: 1.5rem; line-height: 1.2;
+    }
+    .card-byline {
+      font-family: 'Inter', sans-serif;
+      font-size: .65rem; color: var(--ink-muted);
+      margin-bottom: 8px;
+      display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+    }
+    .card-byline .sep { color: var(--rule); }
+
+    .card-body-text {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: .82rem; color: var(--ink-light);
+      line-height: 1.55;
+      display: none;
+      margin-top: 8px;
+    }
+    .card.expanded .card-body-text { display: block; }
+    .card:first-child .card-body-text { display: block; }
+
+    .card-footer {
+      margin-top: 10px;
+      display: flex; flex-wrap: wrap; gap: 4px; align-items: center;
+    }
+    .tag {
+      font-family: 'Inter', sans-serif;
+      font-size: .6rem; font-weight: 600;
+      padding: 2px 7px; border-radius: 2px;
+      background: var(--paper-dark);
+      color: var(--ink-light);
+      border: 1px solid var(--rule);
+    }
+    .entity-badge {
+      font-family: 'Inter', sans-serif;
+      font-size: .6rem; font-weight: 700;
+      padding: 2px 7px; border-radius: 2px;
+      background: #FEE9E9; color: #900;
+      border: 1px solid #f0c0c0;
+    }
+    .wl-badge {
+      font-family: 'Inter', sans-serif;
+      font-size: .6rem; font-weight: 700;
+      padding: 2px 7px; border-radius: 2px;
+      background: #FFF3CD; color: #7A5A00;
+      border: 1px solid #e8d080;
+    }
+    .prosus-lens-block {
+      margin-top: 10px; padding: 10px 12px;
+      background: #EEF2FF;
+      border-left: 3px solid var(--accent2);
+      font-family: 'Source Serif 4', serif;
+      font-size: .78rem; line-height: 1.5;
+      color: var(--accent2);
+    }
+    .prosus-lens-block strong {
+      font-family: 'Inter', sans-serif;
+      font-size: .6rem; text-transform: uppercase;
+      letter-spacing: .5px; display: block;
+      margin-bottom: 3px;
+    }
+    .read-link {
+      font-family: 'Inter', sans-serif;
+      font-size: .72rem; font-weight: 600;
+      color: var(--accent2);
+      text-decoration: none;
+      display: inline-block; margin-top: 8px;
+    }
+    .read-link:hover { text-decoration: underline; }
+
+    /* Flash highlight border */
+    .card.flash-card::after {
+      content: '';
+      position: absolute; top: 0; left: 0;
+      width: 3px; height: 100%;
+      background: var(--accent);
+    }
+
+    /* ── DIVIDER ──────────────────────────────────────────────────── */
+    .col-rule {
+      width: 1px; background: var(--rule);
+      margin: 0 4px;
+    }
+
+    /* ── EMPTY ────────────────────────────────────────────────────── */
+    .empty {
+      grid-column: 1 / -1;
+      text-align: center; padding: 48px 24px;
+      font-family: 'Inter', sans-serif;
+      font-size: .85rem; color: var(--ink-muted);
+    }
+    .empty .icon { font-size: 2rem; display: block; margin-bottom: 8px; }
+
+    /* ── LOADING ──────────────────────────────────────────────────── */
+    #spinner {
+      text-align: center; padding: 64px;
+      font-family: 'Inter', sans-serif;
+      color: var(--ink-muted); font-size: .85rem;
+    }
+    #spinner::before { content: "Loading…"; }
+
+    /* ── FOOTER ───────────────────────────────────────────────────── */
+    footer {
+      border-top: 1px solid var(--rule);
+      padding: 16px 24px;
+      font-family: 'Inter', sans-serif;
+      font-size: .68rem; color: var(--ink-muted);
+      display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 8px;
+    }
+    footer a { color: var(--accent2); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+
+<!-- MASTHEAD -->
+<div class="masthead">
+  <div class="masthead-top">
+    <div class="masthead-brand">
+      <div>
+        <div class="masthead-title">Prosus Reg Monitor</div>
+        <div class="masthead-sub">Digital &amp; Regulatory Intelligence</div>
+      </div>
+    </div>
+    <div class="masthead-meta" id="sync-meta">
+      <div>Loading…</div>
+    </div>
+  </div>
+  <div class="nav-strip" id="nav-strip">
+    <span class="nav-btn active" data-cat="all">All</span>
+    <span class="nav-btn" data-cat="ai_tech">AI &amp; Policy</span>
+    <span class="nav-btn" data-cat="privacy_data">Privacy &amp; Data</span>
+    <span class="nav-btn" data-cat="competition">Competition</span>
+    <span class="nav-btn" data-cat="ip_brand">IP &amp; Brand</span>
+    <span class="nav-btn" data-cat="fintech">Fintech</span>
+    <span class="nav-btn" data-cat="platform_gig">Platform &amp; Gig</span>
+    <span class="nav-btn" data-cat="prosus_only">⬡ Prosus</span>
+  </div>
+</div>
+
+<!-- FLASH ALERTS -->
+<div id="flash-banner">
+  <div class="flash-row">
+    <span class="flash-label">⚡ Alerts</span>
+    <span id="flash-items"></span>
+  </div>
+</div>
+
+<!-- SEARCH -->
+<div class="search-strip">
+  <input type="search" id="search" placeholder="Search articles, topics, entities…"/>
+</div>
+
+<!-- MAIN -->
+<div class="page-wrap">
+  <div id="main"><div id="spinner"></div></div>
+</div>
+
+<footer>
+  <span>Prosus Digital &amp; Regulatory · Updated daily at 06:00 UTC</span>
+  <a href="https://github.com/misschevious-agtk/prosus-reg-super-agent" target="_blank">GitHub ↗</a>
+</footer>
+
+<script>
+const DATA_URL = 'content/index.json';
+
+const TABS = [
+  { key:'ai_tech',          label:'🤖 AI & Policy' },
+  { key:'privacy_data',     label:'🔒 Privacy & Data' },
+  { key:'competition',      label:'⚖️ Competition' },
+  { key:'ip_brand',         label:'💡 IP & Brand' },
+  { key:'fintech',          label:'💳 Fintech' },
+  { key:'platform_gig',     label:'🌐 Platform & Gig' },
+];
+const CAT_LABELS = {
+  all:'All Articles',
+  ai_tech:'AI & Policy',
+  privacy_data:'Privacy & Data',
+  competition:'Competition',
+  ip_brand:'IP & Brand',
+  fintech:'Fintech',
+  platform_gig:'Platform & Gig',
+  prosus_only:'Prosus Direct',
+};
+
+let data = null, currentCat = 'all', searchQuery = '', flashIds = new Set();
+
+async function loadData() {
+  document.getElementById('spinner').style.display='block';
+  try {
+    const r = await fetch(DATA_URL + '?t=' + Date.now());
+    data = await r.json();
+    (data.flash_alerts||[]).forEach(a => flashIds.add(a.id));
+    renderMeta();
+    renderFlash();
+    renderMain();
+  } catch(e) {
+    document.getElementById('main').innerHTML =
+      '<div class="empty"><span class="icon">⚠️</span>Could not load content — run the scraper first.</div>';
+  }
+}
+
+function renderMeta() {
+  if (!data) return;
+  const d = new Date(data.generated_at);
+  const fmt = d.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'long',year:'numeric'});
+  document.getElementById('sync-meta').innerHTML =
+    `<strong>${fmt}</strong><br/>30-day window · ${data.sources||'–'} sources`;
+}
+
+function renderFlash() {
+  const alerts = data.flash_alerts || [];
+  if (!alerts.length) return;
+  const banner = document.getElementById('flash-banner');
+  const items  = document.getElementById('flash-items');
+  banner.style.display = 'block';
+  items.innerHTML = alerts.slice(0,5).map((a,i) =>
+    (i>0?'<span class="flash-sep">·</span>':'')+
+    `<span class="flash-item" onclick="jumpTo('${a.id}','${a.category||''}')">${a.title}</span>`
+  ).join('');
+}
+
+function jumpTo(id, cat) {
+  const target = cat || findCat(id);
+  if (target && currentCat !== target) {
+    setTab(target);
+  }
+  setTimeout(() => {
+    const el = document.querySelector(`[data-id="${id}"]`);
+    if (el) { el.scrollIntoView({behavior:'smooth',block:'center'}); el.classList.add('expanded'); }
+  }, 80);
+}
+
+function findCat(id) {
+  for (const t of TABS) {
+    if ((data[t.key]||[]).some(a=>a.id===id)) return t.key;
+  }
+  return 'all';
+}
+
+function setTab(cat) {
+  currentCat = cat;
+  document.querySelectorAll('.nav-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.cat === cat);
+  });
+  renderMain();
+}
+
+function getArticles() {
+  if (!data) return [];
+  let arts = [];
+  const seen = new Set();
+
+  if (currentCat === 'all') {
+    TABS.forEach(t => {
+      (data[t.key]||[]).forEach(a => { if (!seen.has(a.id)) { seen.add(a.id); arts.push(a); }});
+    });
+    arts.sort((a,b) => b.date.localeCompare(a.date));
+  } else if (currentCat === 'prosus_only') {
+    TABS.forEach(t => {
+      (data[t.key]||[]).forEach(a => {
+        if (!seen.has(a.id) && (a.entity_match||[]).length > 0) {
+          seen.add(a.id); arts.push(a);
+        }
+      });
+    });
+  } else {
+    arts = data[currentCat] || [];
+  }
+
+  if (searchQuery) {
+    const q = searchQuery.toLowerCase();
+    arts = arts.filter(a =>
+      a.title.toLowerCase().includes(q) ||
+      (a.tags||[]).some(t=>t.toLowerCase().includes(q)) ||
+      (a.entity_match||[]).some(e=>e.toLowerCase().includes(q))
+    );
+  }
+  return arts;
+}
+
+function esc(s) { return String(s).replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function buildCard(a, isLead) {
+  const scope   = a.scope_path || 'C';
+  const isFlash = flashIds.has(a.id);
+  const kicker  = [a.source, a.date, scope==='A'?'🔴 Portfolio':''].filter(Boolean).join(' · ');
+  const tags    = (a.tags||[]).slice(0,3).map(t=>`<span class="tag">${esc(t)}</span>`).join('');
+  const ents    = (a.entity_match||[]).map(e=>`<span class="entity-badge">⬡ ${esc(e)}</span>`).join('');
+  const wls     = (a.watchlist_hits||[]).slice(0,2).map(w=>`<span class="wl-badge">👁 ${esc(w)}</span>`).join('');
+  const lens    = a.prosus_lens
+    ? `<div class="prosus-lens-block"><strong>Prosus Read-Across</strong>${esc(a.prosus_lens)}</div>` : '';
+  const readLink = a.url
+    ? `<a class="read-link" href="${esc(a.url)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">Read full article →</a>` : '';
+  const bodyText = a.body
+    ? `<div class="card-body-text">${esc(a.body)}${a.body.length>=300?'…':''}<br/>${readLink}${lens}</div>` : '';
+
+  if (isLead) {
+    return `<div class="card flash-card" data-id="${esc(a.id)}" onclick="toggleCard(this)">
+      <div>
+        <div class="card-kicker"><span class="scope-dot scope-${scope}"></span>${esc(kicker)}</div>
+        <div class="card-headline">${esc(a.title)}</div>
+        <div class="card-byline"><span>${esc(a.source)}</span><span class="sep">·</span><span>${esc(a.date)}</span></div>
+        ${bodyText}
+        <div class="card-footer">${ents}${wls}${tags}</div>
+      </div>
+    </div>`;
+  }
+
+  return `<div class="card${isFlash?' flash-card':''}" data-id="${esc(a.id)}" onclick="toggleCard(this)">
+    <div class="card-kicker"><span class="scope-dot scope-${scope}"></span>${esc(a.source)}</div>
+    <div class="card-headline">${esc(a.title)}</div>
+    <div class="card-byline"><span>${esc(a.date)}</span>${scope==='A'?'<span class="sep">·</span><span style="color:var(--accent)">Portfolio</span>':''}</div>
+    ${bodyText}
+    <div class="card-footer">${ents}${wls}${tags}</div>
+  </div>`;
+}
+
+function renderMain() {
+  const main = document.getElementById('main');
+  const arts  = getArticles();
+  const label = CAT_LABELS[currentCat] || currentCat;
+  const total = arts.length;
+
+  // Stats row
+  const flashCount = (data.flash_alerts||[]).length;
+  let statCells = `<div class="stat-cell"><span class="stat-num">${data.total_articles||0}</span><span class="stat-lbl">Total</span></div>`;
+  statCells += `<div class="stat-cell"><span class="stat-num">${flashCount}</span><span class="stat-lbl">⚡ Alerts</span></div>`;
+  TABS.forEach(t => {
+    const n = (data[t.key]||[]).length;
+    if (n) statCells += `<div class="stat-cell"><span class="stat-num">${n}</span><span class="stat-lbl">${t.label.replace(/^[^ ]+ /,'')}</span></div>`;
+  });
+
+  if (!arts.length) {
+    main.innerHTML = `<div class="stats-row">${statCells}</div>
+      <div class="news-grid"><div class="empty"><span class="icon">🔍</span>No articles found.</div></div>`;
+    return;
+  }
+
+  let cards = '';
+  arts.forEach((a, i) => { cards += buildCard(a, i === 0); });
+
+  main.innerHTML = `
+    <div class="stats-row">${statCells}</div>
+    <div class="section-masthead">
+      <h2>${esc(label)}</h2>
+      <span class="section-count">${total} articles</span>
+      <span class="section-date" id="sync-meta-inline"></span>
+    </div>
+    <div class="news-grid">${cards}</div>`;
+
+  // Sync date inline
+  if (data) {
+    const d = new Date(data.generated_at);
+    const s = document.getElementById('sync-meta-inline');
+    if (s) s.textContent = 'Updated ' + d.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+  }
+}
+
+function toggleCard(card) { card.classList.toggle('expanded'); }
+
+document.getElementById('nav-strip').addEventListener('click', e => {
+  const btn = e.target.closest('.nav-btn');
+  if (btn) setTab(btn.dataset.cat);
+});
+
+document.getElementById('search').addEventListener('input', e => {
+  searchQuery = e.target.value.trim();
+  renderMain();
+});
+
+loadData();
+</script>
+</body>
+</html>
